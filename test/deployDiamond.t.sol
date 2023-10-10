@@ -5,8 +5,10 @@ import "../contracts/interfaces/IDiamondCut.sol";
 import "../contracts/facets/DiamondCutFacet.sol";
 import "../contracts/facets/DiamondLoupeFacet.sol";
 import "../contracts/facets/OwnershipFacet.sol";
-import "../contracts/facets/TokenFacet.sol";
+import "../contracts/facets/NftFacet.sol";
+// import "contracts/facets/MarketPlace.sol";
 import "../contracts/Diamond.sol";
+// ERC721Facet
 
 import "./helpers/DiamondUtils.sol";
 
@@ -16,7 +18,8 @@ contract DiamondDeployer is DiamondUtils, IDiamondCut {
     DiamondCutFacet dCutFacet;
     DiamondLoupeFacet dLoupe;
     OwnershipFacet ownerF;
-    TokenFacet tokenF;
+    NftFacet nftF;
+    // MarketPlaceFacet marketPlaceF;
 
     function testDeployDiamond() public {
         //deploy facets
@@ -24,12 +27,13 @@ contract DiamondDeployer is DiamondUtils, IDiamondCut {
         diamond = new Diamond(
             address(this),
             address(dCutFacet),
-            "Blessed",
-            "BTK"
+            "NFTFacet",
+            "NFT"
         );
         dLoupe = new DiamondLoupeFacet();
         ownerF = new OwnershipFacet();
-        tokenF = new TokenFacet(18);
+        nftF = new NftFacet();
+        // marketPlaceF = new MarketPlaceFacet();
 
         //upgrade diamond with facets
 
@@ -54,11 +58,19 @@ contract DiamondDeployer is DiamondUtils, IDiamondCut {
 
         cut[2] = (
             FacetCut({
-                facetAddress: address(tokenF),
+                facetAddress: address(nftF),
                 action: FacetCutAction.Add,
-                functionSelectors: generateSelectors("TokenFacet")
+                functionSelectors: generateSelectors("NftFacet")
             })
         );
+
+        // cut[3] = (
+        //     FacetCut({
+        //         facetAddress: address(tokenF),
+        //         action: FacetCutAction.Add,
+        //         functionSelectors: generateSelectors("MarketPlaceFacet")
+        //     })
+        // );
 
         //upgrade diamond
         IDiamondCut(address(diamond)).diamondCut(cut, address(0x0), "");
@@ -71,10 +83,10 @@ contract DiamondDeployer is DiamondUtils, IDiamondCut {
         // assertEq(TokenFacet(address(diamond)).name, "Blessed");
     }
 
-    function testTransfer() public {
-        vm.startPrank(address(0x1111));
-        tokenF(address(diamond)).mint(address);
-    }
+    // function testTransfer() public {
+    //     vm.startPrank(address(0x1111));
+    //     tokenF(address(diamond)).mint(address);
+    // }
 
     function diamondCut(
         FacetCut[] calldata _diamondCut,

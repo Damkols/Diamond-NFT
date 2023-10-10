@@ -7,6 +7,17 @@ pragma solidity ^0.8.0;
 /******************************************************************************/
 import {IDiamondCut} from "../interfaces/IDiamondCut.sol";
 
+        struct Order {
+        address token;
+        uint256 tokenId;
+        uint256 price;
+        bytes sig;
+        // Slot 4
+        uint88 deadline;
+        address owner;
+        bool active;
+    }
+
 library LibDiamond {
     error InValidFacetCutAction();
     error NotDiamondOwner();
@@ -46,12 +57,35 @@ library LibDiamond {
         // Used to implement ERC-165.
         mapping(bytes4 => bool) supportedInterfaces;
         // owner of the contract
-        address contractOwner;
-        string name;
-        string symbol;
-        mapping(address => uint256) balances;
-        mapping(address => mapping(address => uint256)) allowed;
-        uint256 totalSupply;
+        // address contractOwner;
+        // string name;
+        // string symbol;
+        // mapping(address => uint256) balances;
+        // mapping(address => mapping(address => uint256)) allowed;
+        // uint256 totalSupply;
+
+// NFT
+ // owner of the contract
+    address nftContractOwner;
+            // Token name
+    string _name;
+
+    // Token symbol
+    string _symbol;
+    uint256 tokenId;
+
+    mapping(uint256 tokenId => address) _owners;
+
+    mapping(address owner => uint256) _balances;
+
+    mapping(uint256 tokenId => address) _tokenApprovals;
+
+    mapping(address owner => mapping(address operator => bool)) _operatorApprovals;
+
+    mapping(uint256 => Order) orders;
+    address admin;
+    uint256 orderId;
+
     }
 
     function diamondStorage()
@@ -72,29 +106,37 @@ library LibDiamond {
 
     function setContractOwner(address _newOwner) internal {
         DiamondStorage storage ds = diamondStorage();
-        address previousOwner = ds.contractOwner;
-        ds.contractOwner = _newOwner;
+        address previousOwner = ds.nftContractOwner;
+        ds.nftContractOwner = _newOwner;
         emit OwnershipTransferred(previousOwner, _newOwner);
     }
 
     function contractOwner() internal view returns (address contractOwner_) {
-        contractOwner_ = diamondStorage().contractOwner;
+        contractOwner_ = diamondStorage().nftContractOwner;
     }
 
-    function setERC20Details(
-        uint256 _initialAmount,
+    // function setERC20Details(
+    //     uint256 _initialAmount,
+    //     string memory _name,
+    //     string memory _symbol
+    // ) internal {
+    //     DiamondStorage storage ds = diamondStorage();
+    //     ds.balances[ds.contractOwner] = _initialAmount;
+    //     ds.totalSupply = _initialAmount;
+    //     ds.name = _name;
+    //     ds.symbol = _symbol;
+    // }
+    function setERC721Details(
         string memory _name,
         string memory _symbol
     ) internal {
         DiamondStorage storage ds = diamondStorage();
-        ds.balances[ds.contractOwner] = _initialAmount;
-        ds.totalSupply = _initialAmount;
-        ds.name = _name;
-        ds.symbol = _symbol;
+        ds._name = _name;
+        ds._symbol = _symbol;
     }
 
     function enforceIsContractOwner() internal view {
-        if (msg.sender != diamondStorage().contractOwner)
+        if (msg.sender != diamondStorage().nftContractOwner)
             revert NotDiamondOwner();
     }
 

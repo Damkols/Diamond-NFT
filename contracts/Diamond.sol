@@ -13,13 +13,18 @@ import {IDiamondCut} from "./interfaces/IDiamondCut.sol";
 
 contract Diamond {
     constructor(
-        address _contractOwner,
+        // address _contractOwner,
         address _diamondCutFacet,
-        string memory _name,
-        string memory _symbol
+        // string memory _name,
+        // string memory _symbol,
+        address _nftContractOwner,
+        string memory name,
+        string memory symbol
     ) payable {
-        LibDiamond.setContractOwner(_contractOwner);
-        LibDiamond.setERC20Details(100000e18, _name, _symbol);
+        // LibDiamond.setContractOwner(_contractOwner);
+        LibDiamond.setContractOwner(_nftContractOwner);
+        // LibDiamond.setERC20Details(100000e18, _name, _symbol);
+        LibDiamond.setERC721Details(name, symbol);
 
         // Add the diamondCut external function from the diamondCutFacet
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);
